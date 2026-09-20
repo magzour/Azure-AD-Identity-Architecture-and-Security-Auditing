@@ -38,3 +38,42 @@ The implementation models a standard corporate IT topology: a dedicated **Window
                |  |    10.0.0.4        |   |      10.0.0.5      |  |
                |  +--------------------+   +--------------------+  |
                +---------------------------------------------------+
+---
+
+## 🚀 Deployment & Implementation
+
+### 1. Cloud Infrastructure & Virtual Network Provisioning
+1. Provisioned a dedicated resource group (`AD-Lab`) in `US-West 2` to isolate lab resources.
+2. Established an Azure Virtual Network (`AD-VNet`) with a default subnet to facilitate flat Layer 3 communication between compute nodes.
+3. Deployed two VMs (`DC-01` and `Client-01`) within the subnet, attaching Network Security Groups (NSGs) allowing controlled inbound RDP access (Port 3389).
+
+<p align="center">
+  <img width="850" alt="Resource Group Deployment" src="https://github.com/user-attachments/assets/43e3c00d-b3db-4ef7-89bf-cbd00e3c9a1c" />
+</p>
+
+---
+
+### 2. Domain Controller Promotion (`DC-01`)
+1. Connected via RDP to `DC-01` using initial local administrator credentials.
+2. Installed **Active Directory Domain Services (AD DS)** and the **DNS Server** role via Server Manager.
+3. Promoted the server to a Domain Controller:
+   * **Deployment Operation:** Add a new forest
+   * **Root Domain Name:** `corp.local`
+   * **Forest & Domain Functional Level:** Windows Server 2022
+   * Configured Directory Services Restore Mode (DSRM) credentials and rebooted the system to apply directory partitions.
+
+<p align="center">
+  <img width="850" alt="AD DS Role Promotion" src="https://github.com/user-attachments/assets/85b36e85-a67a-4af1-a5f4-fcfb375cca85" />
+</p>
+
+---
+
+### 3. DNS Redirection & Domain Join (`Client-01`)
+For successful domain resolution, the client machine must resolve internal DNS queries against the domain controller rather than Azure's public virtual IP resolver.
+
+1. Accessed `Client-01` via RDP and navigated to the network adapter properties (`IPv4`).
+2. Pointed **Preferred DNS Server** directly to `DC-01`'s private internal IP (`10.0.0.4`).
+3. Appended the client machine to the `corp.local` domain via **System Properties > Computer Name / Domain Changes**, providing Domain Admin credentials (`corp\adminuser`) to authorize the machine account creation in AD.
+4. Rebooted the endpoint and verified membership via the command line:
+   ```cmd
+   whoami
