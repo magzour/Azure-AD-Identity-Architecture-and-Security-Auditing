@@ -77,3 +77,80 @@ For successful domain resolution, the client machine must resolve internal DNS q
 4. Rebooted the endpoint and verified membership via the command line:
    ```cmd
    whoami
+
+In the screenshot, lines 81 through 88 are still the unformatted comma-separated text.
+
+Here is the step-by-step fix:
+
+1. **Delete lines 81 through 88 completely**.
+
+
+2. Click on line 80 (right below `whoami`) and paste this entire block:
+
+
+
+```markdown
+
+```
+
+*Output: `corp\adminuser*`
+
+---
+
+### 4. Identity Management & RBAC Configuration
+
+To reflect an enterprise tier structure, identities were segmented into structured Organizational Units (OUs) rather than unmanaged default containers.
+
+* Created a top-level OU: `Avengers`
+* Provisioned identity accounts: `Peter Parker` (`corp\peter`), `Bruce Banner`, and `Tony Stark`.
+* Enforced Least Privilege by keeping test users in the standard `Domain Users` group while granting explicit interactive workstation access by placing selected identities into the local **Remote Desktop Users** group on `Client-01`.
+
+---
+
+## 🛡️ Security Operations & Audit Log Analysis
+
+An essential function of directory service administration is security monitoring and auditing. Active Directory writes all authentication and account management operations to the **Windows Security Event Log**.
+
+### Key Windows Security Event IDs Monitored
+
+| Event ID | Category | Description | SOC & Operational Significance |
+| --- | --- | --- | --- |
+| **4624** | Authentication | Successful Logon | Baselines standard access; identifies logon type (e.g., Type 3 Network, Type 10 Remote). |
+| **4625** | Authentication | Failed Logon | Primary indicator for credential brute-forcing, password spraying, or misconfigured services. |
+| **4648** | Authentication | Logon using explicit credentials | Flags lateral movement techniques (e.g., `runas` utility usage). |
+| **4720** | Account Management | User Account Created | Tracks identity lifecycle and flags unauthorized user provisioning. |
+| **4724** | Account Management | Password Reset Attempt | Audits administrative credential resets across directory accounts. |
+| **4726** | Account Management | User Account Deleted | Audit trail for identity offboarding or unauthorized account removal. |
+| **4732** | Group Management | Member Added to Security Group | Critical for detecting privilege escalation into high-value groups (e.g., Domain Admins). |
+
+### Practical Telemetry Export
+
+Filtered event views were isolated and saved as structured `.evtx` / `.xml` log exports. In production operations, these log structures are ingested by forwarders into a centralized SIEM (such as Splunk or Microsoft Sentinel) to power detection rules, automated alerts, and forensic timelines.
+
+---
+
+## 💡 Troubleshooting & Key Takeaways
+
+* **Azure Smart App Control / Untrusted RDP Downloads:**
+* *Symptom:* Local browser or Windows Defender blocks execution of downloaded Azure `.rdp` connection files.
+* *Resolution:* Inspected `.rdp` properties and checked the **Unblock** attribute under the General tab to bypass smart screening.
+
+
+* **DNS Resolution Bottlenecks During Domain Join:**
+* *Symptom:* Joining `Client-01` to `corp.local` failed with "An Active Directory Domain Controller (AD DC) for the domain could not be contacted."
+* *Resolution:* Azure default DHCP assigns Azure-provided DNS resolvers. Manually hardcoded the client's Primary IPv4 DNS server to point directly to `DC-01`'s private static IP (`10.0.0.4`), resolving SRV record lookups immediately.
+
+
+* **Enterprise Replication:**
+* Demonstrated how corporate network policies mirror hybrid environments, enforcing directory-level access boundaries and centralizing security logging across cloud-hosted assets.
+
+
+
+```
+
+---
+
+### Verification
+Click the **Preview** tab near the top left of GitHub's editor[cite: 2]. Scroll down to the bottom: you will see the `whoami` block closed properly, the domain-join screenshot rendered, the user creation section, and the table fully formatted under the **Security Operations** section.
+
+```
