@@ -1,4 +1,4 @@
-# Enterprise Active Directory & Identity Management in Microsoft Azure
+﻿# Enterprise Active Directory & Identity Management in Microsoft Azure
 
 [![Azure](https://img.shields.io/badge/Platform-Microsoft%20Azure-0078D4?logo=microsoftazure&logoColor=white)](#)
 [![Windows Server](https://img.shields.io/badge/OS-Windows%20Server%202022-0078D6?logo=windows&logoColor=white)](#)
@@ -26,7 +26,7 @@ The implementation models a standard corporate IT topology: a dedicated **Window
   * **Role:** Domain-joined managed client endpoint
   * **DNS:** Configured statically to point to `DC-01` (`10.0.0.4`)
 
-```text
+<pre>
                +---------------------------------------------------+
                |               Azure Virtual Network               |
                |                     (AD-VNet)                     |
@@ -34,10 +34,12 @@ The implementation models a standard corporate IT topology: a dedicated **Window
                |  +--------------------+   +--------------------+  |
                |  |     DC-01 (VM)     |   |   Client-01 (VM)   |  |
                |  |  Windows Svr 2022  |   |     Windows 11     |  |
-               |  |  AD DS & DNS Role  |<--|    Domain Joined   |  |
+               |  |  AD DS & DNS Role  |&lt;--|    Domain Joined   |  |
                |  |    10.0.0.4        |   |      10.0.0.5      |  |
                |  +--------------------+   +--------------------+  |
                +---------------------------------------------------+
+</pre>
+
 ---
 
 ## 🚀 Deployment & Implementation
@@ -75,35 +77,24 @@ For successful domain resolution, the client machine must resolve internal DNS q
 2. Pointed **Preferred DNS Server** directly to `DC-01`'s private internal IP (`10.0.0.4`).
 3. Appended the client machine to the `corp.local` domain via **System Properties > Computer Name / Domain Changes**, providing Domain Admin credentials (`corp\adminuser`) to authorize the machine account creation in AD.
 4. Rebooted the endpoint and verified membership via the command line:
-   ```cmd
-   whoami
+   * `whoami` -> `corp\adminuser`
 
-In the screenshot, lines 81 through 88 are still the unformatted comma-separated text.
-
-Here is the step-by-step fix:
-
-1. **Delete lines 81 through 88 completely**.
-
-
-2. Click on line 80 (right below `whoami`) and paste this entire block:
-
-
-
-```markdown
-
-```
-
-*Output: `corp\adminuser*`
+<p align="center">
+  <img width="800" alt="Domain Join Confirmation" src="https://github.com/user-attachments/assets/7ef11730-5ec4-4684-b374-4c177ed82ce3" />
+</p>
 
 ---
 
 ### 4. Identity Management & RBAC Configuration
-
 To reflect an enterprise tier structure, identities were segmented into structured Organizational Units (OUs) rather than unmanaged default containers.
 
 * Created a top-level OU: `Avengers`
 * Provisioned identity accounts: `Peter Parker` (`corp\peter`), `Bruce Banner`, and `Tony Stark`.
 * Enforced Least Privilege by keeping test users in the standard `Domain Users` group while granting explicit interactive workstation access by placing selected identities into the local **Remote Desktop Users** group on `Client-01`.
+
+<p align="center">
+  <img width="850" alt="Active Directory Users and Computers" src="https://github.com/user-attachments/assets/14afa53d-6865-4ddb-885e-53fe5ed6c0f4" />
+</p>
 
 ---
 
@@ -114,7 +105,7 @@ An essential function of directory service administration is security monitoring
 ### Key Windows Security Event IDs Monitored
 
 | Event ID | Category | Description | SOC & Operational Significance |
-| --- | --- | --- | --- |
+| :---: | :--- | :--- | :--- |
 | **4624** | Authentication | Successful Logon | Baselines standard access; identifies logon type (e.g., Type 3 Network, Type 10 Remote). |
 | **4625** | Authentication | Failed Logon | Primary indicator for credential brute-forcing, password spraying, or misconfigured services. |
 | **4648** | Authentication | Logon using explicit credentials | Flags lateral movement techniques (e.g., `runas` utility usage). |
@@ -123,34 +114,22 @@ An essential function of directory service administration is security monitoring
 | **4726** | Account Management | User Account Deleted | Audit trail for identity offboarding or unauthorized account removal. |
 | **4732** | Group Management | Member Added to Security Group | Critical for detecting privilege escalation into high-value groups (e.g., Domain Admins). |
 
-### Practical Telemetry Export
+<p align="center">
+  <img width="900" alt="Event Viewer Security Log Filtering" src="https://github.com/user-attachments/assets/de04f2a7-5d3e-4136-b61b-4e5dde7d3aa6" />
+</p>
 
+### Practical Telemetry Export
 Filtered event views were isolated and saved as structured `.evtx` / `.xml` log exports. In production operations, these log structures are ingested by forwarders into a centralized SIEM (such as Splunk or Microsoft Sentinel) to power detection rules, automated alerts, and forensic timelines.
 
 ---
 
 ## 💡 Troubleshooting & Key Takeaways
 
-* **Azure Smart App Control / Untrusted RDP Downloads:**
-* *Symptom:* Local browser or Windows Defender blocks execution of downloaded Azure `.rdp` connection files.
-* *Resolution:* Inspected `.rdp` properties and checked the **Unblock** attribute under the General tab to bypass smart screening.
-
-
+* **Azure Smart App Control / Untrusted RDP Downloads:** 
+  * *Symptom:* Local browser or Windows Defender blocks execution of downloaded Azure `.rdp` connection files.
+  * *Resolution:* Inspected `.rdp` properties and checked the **Unblock** attribute under the General tab to bypass smart screening.
 * **DNS Resolution Bottlenecks During Domain Join:**
-* *Symptom:* Joining `Client-01` to `corp.local` failed with "An Active Directory Domain Controller (AD DC) for the domain could not be contacted."
-* *Resolution:* Azure default DHCP assigns Azure-provided DNS resolvers. Manually hardcoded the client's Primary IPv4 DNS server to point directly to `DC-01`'s private static IP (`10.0.0.4`), resolving SRV record lookups immediately.
-
-
+  * *Symptom:* Joining `Client-01` to `corp.local` failed with "An Active Directory Domain Controller (AD DC) for the domain could not be contacted."
+  * *Resolution:* Azure default DHCP assigns Azure-provided DNS resolvers. Manually hardcoded the client's Primary IPv4 DNS server to point directly to `DC-01`'s private static IP (`10.0.0.4`), resolving SRV record lookups immediately.
 * **Enterprise Replication:**
-* Demonstrated how corporate network policies mirror hybrid environments, enforcing directory-level access boundaries and centralizing security logging across cloud-hosted assets.
-
-
-
-```
-
----
-
-### Verification
-Click the **Preview** tab near the top left of GitHub's editor[cite: 2]. Scroll down to the bottom: you will see the `whoami` block closed properly, the domain-join screenshot rendered, the user creation section, and the table fully formatted under the **Security Operations** section.
-
-```
+  * Demonstrated how corporate network policies mirror hybrid environments, enforcing directory-level access boundaries and centralizing security logging across cloud-hosted assets.
