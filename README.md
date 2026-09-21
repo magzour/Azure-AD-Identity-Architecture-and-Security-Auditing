@@ -86,7 +86,7 @@ For successful domain resolution, the client machine must resolve internal DNS q
 ---
 
 ### 4. Identity Management & RBAC Configuration
-To reflect an enterprise tier structure, identities were segmented into structured Organizational Units (OUs) rather than unmanaged default containers.
+To simulate a company environment, identities were seperated into structured Organizational Units (OUs) rather than unmanaged default containers.
 
 * Created a top-level OU: `Avengers`
 * Provisioned identity accounts: `Peter Parker` (`corp\peter`), `Bruce Banner`, and `Tony Stark`.
@@ -100,7 +100,7 @@ To reflect an enterprise tier structure, identities were segmented into structur
 
 ## 🛡️ Security Operations & Audit Log Analysis
 
-An essential function of directory service administration is security monitoring and auditing. Active Directory writes all authentication and account management operations to the **Windows Security Event Log**.
+An essential function of Active Directory administration is security monitoring and auditing. Active Directory writes all authentication and account management operations to the **Windows Security Event Log**.
 
 ### Key Windows Security Event IDs Monitored
 
@@ -118,8 +118,8 @@ An essential function of directory service administration is security monitoring
   <img width="900" alt="Event Viewer Security Log Filtering" src="https://github.com/user-attachments/assets/de04f2a7-5d3e-4136-b61b-4e5dde7d3aa6" />
 </p>
 
-### Practical Telemetry Export
-Filtered event views were isolated and saved as structured `.evtx` / `.xml` log exports. In production operations, these log structures are ingested by forwarders into a centralized SIEM (such as Splunk or Microsoft Sentinel) to power detection rules, automated alerts, and forensic timelines.
+### Export
+Filtered event views were isolated and saved as structured `.evtx` / `.xml` log exports. In production operations, these log structures are given to analysts so that they can import them into a SIEM (such as Splunk or Microsoft Sentinel) to power detection rules, automated alerts, and forensic timelines.
 
 ---
 
@@ -132,4 +132,4 @@ Filtered event views were isolated and saved as structured `.evtx` / `.xml` log 
   * *Symptom:* Joining `Client-01` to `corp.local` failed with "An Active Directory Domain Controller (AD DC) for the domain could not be contacted."
   * *Resolution:* Azure default DHCP assigns Azure-provided DNS resolvers. Manually hardcoded the client's Primary IPv4 DNS server to point directly to `DC-01`'s private static IP (`10.0.0.4`), resolving SRV record lookups immediately.
 * **Enterprise Replication:**
-  * Demonstrated how corporate network policies mirror hybrid environments, enforcing directory-level access boundaries and centralizing security logging across cloud-hosted assets.
+  * Demonstrated how corporate network policies mirror hybrid environments, creating directory-level access boundaries and centralizing security logging across virtual machines.
