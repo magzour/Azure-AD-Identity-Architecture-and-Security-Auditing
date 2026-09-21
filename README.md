@@ -5,7 +5,7 @@
 [![Active Directory](https://img.shields.io/badge/Service-AD%20DS%20%7C%20DNS-blue)](#)
 [![Security](https://img.shields.io/badge/SOC%20Analysis-Windows%20Event%20Logs-green)](#)
 
-## 📌 Executive Summary
+## 📌 Goal for this project
 This project demonstrates the end-to-end design, provisioning, and administration of an on-premises style enterprise identity environment hosted natively within **Microsoft Azure**. 
 
 The implementation models a standard corporate IT topology: a dedicated **Windows Server 2022 Domain Controller (`corp.local`)** providing identity, authentication, and DNS services to domain-joined workstations. Beyond core systems administration, the environment was leveraged to validate Role-Based Access Control (RBAC), Group Policy scoping, and Windows Security Event auditing for ingestion into downstream SIEM platforms like Splunk.
